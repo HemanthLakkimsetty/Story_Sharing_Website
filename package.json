@@ -1,0 +1,21 @@
+{
+  "name": "storyweb",
+  "version": "1.0.0",
+  "main": "public/index.html",
+  "scripts": {
+    "start": "serve public -p 3000",
+    "build": "echo 'Static site build completed'",
+    "dev": "serve public -p 3000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["story", "sharing", "static", "netlify"],
+  "author": "",
+  "license": "ISC",
+  "description": "A static story sharing website that works with Netlify",
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
