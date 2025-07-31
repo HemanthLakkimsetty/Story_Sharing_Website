@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ShareYourStory</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; background: #f9f9f9; }
+    h1 { text-align: center; }
+    .logo { text-align: center; font-size: 2.2em; margin: 20px 0 10px 0; font-weight: bold; letter-spacing: 2px; color: #007bff; }
+    .progress-bar { background: #eee; width: 100%; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+    .progress-fill { background: #007bff; height: 12px; }
+    a { text-decoration: none; color: #007bff; }
+    .story-block { background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px #eee; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="logo">ShareYourStory</div>
+  <h1>Your Reading Progress</h1>
+  <% if (stories.length === 0) { %>
+    <p>No stories available.</p>
+  <% } else { %>
+    <% stories.forEach(function(story, idx) { %>
+      <div class="story-block">
+        <a href="/story/<%= idx %>"><strong><%= story.title %></strong></a> by <a href="/user/<%= story.author %>"><%= story.author %></a><br/>
+        <!-- Reading progress bar and count removed -->
+      </div>
+    <% }); %>
+  <% } %>
+  <p><a href="/">&larr; Back to home</a></p>
+</body>
+</html> 

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ShareYourStory</title>
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #222;
+      --card: #fff;
+      --primary: #007bff;
+      --input-bg: #f7faff;
+      --input-shadow: #007bff11;
+    }
+    [data-theme="dark"] {
+      --bg: #181a1b;
+      --text: #f3f3f3;
+      --card: #23272a;
+      --primary: #4f8cff;
+      --input-bg: #23272a;
+      --input-shadow: #4f8cff22;
+    }
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; background: var(--bg); color: var(--text); }
+    h1 { text-align: center; }
+    .logo { text-align: center; font-size: 4em; margin: 40px 0 20px 0; font-weight: bold; letter-spacing: 2px; color: var(--primary); text-shadow: 2px 2px 0 #fff, 4px 4px 8px #007bff55, 0 8px 24px #0002; transform: perspective(200px) rotateX(10deg) scale(1.08); transition: transform 0.3s cubic-bezier(.25,.8,.25,1), text-shadow 0.3s cubic-bezier(.25,.8,.25,1); }
+    .logo:hover { transform: perspective(200px) rotateX(0deg) scale(1.12); text-shadow: 2px 2px 0 #fff, 6px 6px 16px #007bff99, 0 12px 32px #0003; }
+    .topbar { text-align: right; margin-bottom: 20px; }
+    .toggle-mode { display: inline-block; margin-right: 16px; cursor: pointer; font-size: 1.2em; background: none; border: none; color: var(--primary); }
+    form, .card, .chapter, .story-meta, .comment, .modal-content {
+      background: var(--card) !important;
+      color: var(--text) !important;
+      box-shadow: 0 2px 8px var(--input-shadow);
+    }
+    .modal {
+      background: rgba(0,0,0,0.4);
+    }
+    .dropdown, select, option {
+      background: var(--card);
+      color: var(--text);
+    }
+    .plus-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.3);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-bg.active { display: flex; }
+    .modal {
+      background: #fff;
+      padding: 32px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px #0002;
+      min-width: 320px;
+      max-width: 90vw;
+      z-index: 201;
+      position: relative;
+      animation: modalIn 0.3s cubic-bezier(.25,.8,.25,1);
+    }
+    @keyframes modalIn {
+      0% { transform: scale(0.8) translateY(-40px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.5em;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">ShareYourStory</div>
+  <div class="topbar">
+    <button class="toggle-mode" id="toggleMode" title="Toggle light/dark mode">🌙</button>
+    <% if (user) { %>
+      Welcome, <a href="/user/<%= user.username %>"><%= user.username %></a> |
+      <a href="/notifications">Notifications<% if (unreadNotifications > 0) { %> (<%= unreadNotifications %>)<% } %></a> |
+      <a href="/progress">Reading Progress</a> |
+      <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a> | <a href="/signup">Sign Up</a>
+    <% } %>
+  </div>
+  <form method="GET" action="/search" style="margin-bottom:20px; text-align:center; background:#fff; padding:16px; border-radius:8px; box-shadow:0 2px 8px #eee;">
+    <input type="text" name="q" placeholder="Title contains..." value="<%= search %>" style="width:30%;padding:8px;border-radius:4px;border:1px solid #ccc;" />
+    <input type="text" name="author" placeholder="Author" value="<%= typeof author !== 'undefined' ? author : '' %>" style="width:15%;padding:8px;border-radius:4px;border:1px solid #ccc;" />
+    <select name="category" style="width:15%;padding:8px;border-radius:4px;border:1px solid #ccc;">
+      <option value="">Any Category</option>
+      <% categories.forEach(function(cat) { %>
+        <option value="<%= cat %>" <%= (typeof category !== 'undefined' && category === cat) ? 'selected' : '' %>><%= cat %></option>
+      <% }); %>
+    </select>
+    <button type="submit">Search</button>
+  </form>
+  <form method="GET" action="/category/" style="margin-bottom:20px; text-align:center; display:inline-block; width:28%;">
+    <select name="category" onchange="if(this.value) window.location='/category/' + this.value;" style="width:90%;padding:8px;border-radius:4px;border:1px solid #ccc;">
+      <option value="">Filter by category</option>
+      <% categories.forEach(function(cat) { %>
+        <option value="<%= cat %>" <%= filterCategory === cat ? 'selected' : '' %>><%= cat %></option>
+      <% }); %>
+    </select>
+  </form>
+  <% if (filterTag) { %>
+    <div style="margin-bottom:10px;">Filtering by tag: <strong><%= filterTag %></strong> <a href="/">[clear]</a></div>
+  <% } %>
+  <% if (filterCategory) { %>
+    <div style="margin-bottom:10px;">Filtering by category: <strong><%= filterCategory %></strong> <a href="/">[clear]</a></div>
+  <% } %>
+  <% if (user) { %>
+    <button class="plus-btn" id="showStoryModal" title="Share a New Story">+</button>
+    <div class="modal-bg" id="storyModalBg">
+      <div class="modal">
+        <button class="modal-close" id="closeStoryModal">&times;</button>
+        <h2 style="text-align:center;">Share a New Story</h2>
+        <form method="POST" action="/story">
+          <input name="author" placeholder="Your Name" required value="<%= user.username %>" readonly />
+          <input name="title" placeholder="Story Title" required />
+          <input name="tags" placeholder="Tags (comma separated)" />
+          <select name="category" required>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat %>"><%= cat %></option>
+            <% }); %>
+          </select>
+          <button type="submit">Create Story</button>
+        </form>
+      </div>
+    </div>
+    <script>
+      const showBtn = document.getElementById('showStoryModal');
+      const modalBg = document.getElementById('storyModalBg');
+      const closeBtn = document.getElementById('closeStoryModal');
+      showBtn.onclick = () => { modalBg.classList.add('active'); };
+      closeBtn.onclick = () => { modalBg.classList.remove('active'); };
+      modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.classList.remove('active'); };
+    </script>
+  <% } %>
+  <h2>All Stories</h2>
+  <div style="margin-bottom:20px; text-align:right;">
+    <!-- Sorting dropdown removed -->
+  </div>
+  <% if (stories.length === 0) { %>
+    <% if (search) { %>
+      <p>No stories found for "<%= search %>".</p>
+    <% } else { %>
+      <p>No stories yet. Be the first to create one!</p>
+    <% } %>
+  <% } else { %>
+    <% stories.forEach(function(story, idx) { %>
+      <div style="border:1px solid #ccc;padding:10px;margin-bottom:10px;">
+        <h3><a href="/story/<%= idx %>"><%= story.title %></a></h3>
+        <small>By: <a href="/user/<%= story.author %>"><%= story.author %></a></small>
+        <% if (story.timestamp) { %>
+          <div style="font-size:12px;color:#888;">Posted on <%= new Date(story.timestamp).toLocaleString() %></div>
+        <% } %>
+        <% if (story.category) { %>
+          <div style="font-size:12px;color:#007bff;">Category: <a href="/category/<%= story.category %>"><%= story.category %></a></div>
+        <% } %>
+        <% if (story.tags && story.tags.length) { %>
+          <div style="font-size:12px;">Tags:
+            <% story.tags.forEach(function(tag, tIdx) { %>
+              <a href="/tag/<%= tag %>" style="margin-right:5px;">#<%= tag %></a>
+            <% }); %>
+          </div>
+        <% } %>
+        <p>Total Chapters: <%= story.chapters.length %></p>
+        <p>Views: <%= story.views || 0 %></p>
+      </div>
+    <% }); %>
+  <% } %>
+  <!-- Pagination controls removed -->
+  <script>
+    // Light/Dark mode toggle
+    const toggleBtn = document.getElementById('toggleMode');
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+    toggleBtn.onclick = () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      setTheme(current === 'light' ? 'dark' : 'light');
+    };
+    // On load
+    setTheme(localStorage.getItem('theme') || 'light');
+  </script>
+</body>
+</html> 

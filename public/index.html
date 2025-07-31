@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareYourStory - Share and Read Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        .stories-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .stories-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .stories-header h2 {
+            color: #4a5568;
+            font-size: 1.8rem;
+        }
+
+        .add-story-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-story-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .story-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .story-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .story-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .story-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .story-description {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .story-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .category-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .category-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .category-list li:hover {
+            color: #667eea;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 ShareYourStory</h1>
+            <div class="nav-buttons" id="navButtons">
+                <!-- Navigation buttons will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="stories-section">
+                <div class="stories-header">
+                    <h2>Latest Stories</h2>
+                    <button class="add-story-btn" onclick="showAddStoryModal()">+ Add Story</button>
+                </div>
+                <div class="stories-grid" id="storiesGrid">
+                    <!-- Stories will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="search-section">
+                    <input type="text" class="search-box" placeholder="Search stories..." id="searchBox">
+                </div>
+                
+                <div class="categories-section">
+                    <h3>Categories</h3>
+                    <ul class="category-list" id="categoryList">
+                        <li onclick="filterByCategory('all')">All Stories</li>
+                        <li onclick="filterByCategory('Adventure')">Adventure</li>
+                        <li onclick="filterByCategory('Romance')">Romance</li>
+                        <li onclick="filterByCategory('Fantasy')">Fantasy</li>
+                        <li onclick="filterByCategory('Horror')">Horror</li>
+                        <li onclick="filterByCategory('Sci-Fi')">Sci-Fi</li>
+                        <li onclick="filterByCategory('Mystery')">Mystery</li>
+                        <li onclick="filterByCategory('Drama')">Drama</li>
+                        <li onclick="filterByCategory('Comedy')">Comedy</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Story Modal -->
+    <div class="modal" id="addStoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Story</h2>
+                <button class="close-btn" onclick="closeModal('addStoryModal')">&times;</button>
+            </div>
+            <form id="addStoryForm">
+                <div class="form-group">
+                    <label for="storyTitle">Title</label>
+                    <input type="text" id="storyTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="storyCategory">Category</label>
+                    <select id="storyCategory" required>
+                        <option value="">Select category</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Mystery">Mystery</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Comedy">Comedy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="storyDescription">Description</label>
+                    <textarea id="storyDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="storyContent">Story Content</label>
+                    <textarea id="storyContent" required></textarea>
+                </div>
+                <button type="submit" class="btn">Publish Story</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let stories = [];
+        let currentFilter = 'all';
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUser();
+            loadStories();
+            updateNavigation();
+            displayStories();
+        });
+
+        // User management
+        function loadUser() {
+            const user = localStorage.getItem('currentUser');
+            currentUser = user ? JSON.parse(user) : null;
+        }
+
+        function updateNavigation() {
+            const navButtons = document.getElementById('navButtons');
+            
+            if (currentUser) {
+                navButtons.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${currentUser.username.charAt(0).toUpperCase()}</div>
+                        <span>Welcome, ${currentUser.username}</span>
+                    </div>
+                    <a href="#" onclick="showProfile()" class="btn btn-outline">Profile</a>
+                    <a href="#" onclick="logout()" class="btn btn-secondary">Logout</a>
+                `;
+            } else {
+                navButtons.innerHTML = `
+                    <a href="/login.html" class="btn">Login</a>
+                    <a href="/signup.html" class="btn btn-secondary">Sign Up</a>
+                `;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateNavigation();
+            window.location.reload();
+        }
+
+        // Story management
+        function loadStories() {
+            const savedStories = localStorage.getItem('stories');
+            stories = savedStories ? JSON.parse(savedStories) : getDefaultStories();
+        }
+
+        function saveStories() {
+            localStorage.setItem('stories', JSON.stringify(stories));
+        }
+
+        function getDefaultStories() {
+            return [
+                {
+                    id: 1,
+                    title: 'The Lost City',
+                    author: 'Demo Author',
+                    category: 'Adventure',
+                    description: 'An adventure story about discovering ancient ruins in the Amazon jungle.',
+                    content: 'Deep in the heart of the Amazon rainforest, a team of explorers stumbled upon something that would change their lives forever...',
+                    views: 150,
+                    likes: 25,
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    title: 'Starlight Dreams',
+                    author: 'Demo Author',
+                    category: 'Romance',
+                    description: 'A romantic tale set in a world where dreams become reality under the stars.',
+                    content: 'Under the twinkling stars of a summer night, Sarah found herself drawn to the mysterious stranger who appeared in her dreams...',
+                    views: 89,
+                    likes: 18,
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    title: 'Cyber Detective',
+                    author: 'Demo Author',
+                    category: 'Sci-Fi',
+                    description: 'A sci-fi mystery about solving crimes in a futuristic cyberpunk world.',
+                    content: 'In the neon-lit streets of Neo-Tokyo, Detective Alex Chen navigated a world where technology and humanity blurred...',
+                    views: 203,
+                    likes: 42,
+                    timestamp: new Date().toISOString()
+                }
+            ];
+        }
+
+        function displayStories() {
+            const storiesGrid = document.getElementById('storiesGrid');
+            let filteredStories = stories;
+
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                filteredStories = stories.filter(story => story.category === currentFilter);
+            }
+
+            // Apply search filter
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            if (searchTerm) {
+                filteredStories = filteredStories.filter(story => 
+                    story.title.toLowerCase().includes(searchTerm) ||
+                    story.description.toLowerCase().includes(searchTerm) ||
+                    story.author.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            storiesGrid.innerHTML = filteredStories.map(story => `
+                <div class="story-card" onclick="viewStory(${story.id})">
+                    <div class="story-title">${story.title}</div>
+                    <div class="story-meta">
+                        <span>By ${story.author}</span>
+                        <span>${story.category}</span>
+                    </div>
+                    <div class="story-description">${story.description}</div>
+                    <div class="story-stats">
+                        <span>👁️ ${story.views} views</span>
+                        <span>❤️ ${story.likes} likes</span>
+                        <span>📅 ${new Date(story.timestamp).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewStory(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story) {
+                // Increment views
+                story.views++;
+                saveStories();
+                
+                // Store story in localStorage for the story view page
+                localStorage.setItem('currentStory', JSON.stringify(story));
+                window.location.href = '/story.html';
+            }
+        }
+
+        function filterByCategory(category) {
+            currentFilter = category;
+            displayStories();
+        }
+
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function() {
+            displayStories();
+        });
+
+        // Modal management
+        function showAddStoryModal() {
+            if (!currentUser) {
+                alert('Please login to add a story!');
+                window.location.href = '/login.html';
+                return;
+            }
+            document.getElementById('addStoryModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Add story form
+        document.getElementById('addStoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newStory = {
+                id: Date.now(),
+                title: document.getElementById('storyTitle').value,
+                category: document.getElementById('storyCategory').value,
+                description: document.getElementById('storyDescription').value,
+                content: document.getElementById('storyContent').value,
+                author: currentUser.username,
+                views: 0,
+                likes: 0,
+                timestamp: new Date().toISOString()
+            };
+
+            stories.unshift(newStory);
+            saveStories();
+            displayStories();
+            closeModal('addStoryModal');
+            
+            // Reset form
+            document.getElementById('addStoryForm').reset();
+            
+            alert('Story published successfully!');
+        });
+
+        function showProfile() {
+            window.location.href = '/profile.html';
+        }
+    </script>
+</body>
+</html> 
